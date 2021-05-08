@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    
+    <link rel="stylesheet" href="./main.css">
+    <title>Document</title>
+    
+    <script>
+        
+        $(document).ready(function () {
+            $.ajax({
+                
+                url: "https://reminders-task.hiring.durbin.live/notes",
+                type: "GET",
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "application/json"
+                },
+                success: function (result) {
+                    // alert(Object.keys(result.data.notes).length);
+                    for (let index = 0; index < Object.keys(result.data.notes).length; index++) {
+                        $(".flex_container").append("<div class='item_n' style='background:white'><div class='title'>"+ result.data.notes[index].title +"</div><div class='description'>"+result.data.notes[index].description +"</div><div class='datetime'>" + showdateall(result.data.notes[index].created_at) +"</div><div id="+ result.data.notes[index].id+" class='deleteicon'><span><i class='fas fa-trash-alt'></i></span></div><div id=" + result.data.notes[index].id +" class='editicon'><span><i class='fas fa-pencil-alt'></i></span></div><button id=" + result.data.notes[index].id +"  class='btn btn-info update'>Update</button></div>");
+                        
+                    }
+                    
+                }
+            });
+            $(function () {
+                $("#menu1").on('click', function () {
+                    $(".rotate").toggleClass("flip");
+                    $(this).toggleClass("animate__animated animate__shakeY animation-delay-100");
+
+                });
+            });
+            $("#menu1").click(function () {
+                $(".li_one").fadeIn().addClass("animate__animated animate__bounceInDown animation-delay-100");
+                $(".li_two").fadeIn().addClass("animate__animated animate__bounceInDown animation-delay-200");
+                $(".li_three").fadeIn().addClass("animate__animated animate__bounceInDown animation-delay-300");
+                $(".li_four").fadeIn().addClass("animate__animated animate__bounceInDown animation-delay-400");
+            });
+            $(".rounddiv").click(function () {
+                var color = $(this).css("background-color");
+                
+                
+                $.ajax({
+                    
+                    url: "https://reminders-task.hiring.durbin.live/note", 
+                    type: "POST",
+                    headers:{
+                        "Access-Control-Allow-Origin":"*",
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({"title":"New Note","description":"Description goes here !"}),
+                    success: function (result) {
+                        $(".flex_container").prepend("<div class='item_n animate__animated animate__zoomInLeft animate__slow' style='background:" + color + "'><div class='title' style='color:white'>New Note</div><div class='description' style='color:white'>This is the new Note !</div><div class='datetime' style='color:white'></div><div class='deleteicon'><span><i class='fas fa-trash-alt'></i></span></div><div class='editicon'><span><i class='fas fa-pencil-alt'></i></span></div><button class='btn btn-info update'>Update</button></div>");
+                        showdate();
+                    }
+                });
+                
+            });
+            
+            function showdate(){
+                var dates = new Date();
+                const year = dates.getFullYear();
+                const month = dates.toLocaleString('default', { month: 'long' });
+                const day = dates.getDay() + 2;
+                var fulldate = day + "-" + month + "-" + year;
+                // $(".datetime").text(fulldate);
+                $(".datetime").text(fulldate);
+            }
+            function showdateall(e) {
+                var dates = new Date(e);
+                const year = dates.getFullYear();
+                const month = dates.toLocaleString('default', { month: 'long' });
+                const day = dates.getDay() + 2;
+                var fulldate = day + "-" + month + "-" + year;
+                return fulldate;
+            }
+            
+        });
+        
+        $(document).ready(function () {
+            $('.flex_container').on('click', '.deleteicon', function () {
+                var delid = $(this).attr("id");
+                $(this).parent(".item_n").addClass("animate__animated animate__zoomOutUp ");
+                // alert(delid);
+                $.ajax({
+                    
+                    url: "https://reminders-task.hiring.durbin.live/note/"+ delid,
+                    type: "DELETE",
+                    headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    },
+                    success: function (result) {
+                        alert('Deleted');
+                        
+                        location.reload();
+                    }
+                });
+                
+            });
+        }); 
+        $(document).ready(function () {
+            $('.flex_container').on('click', '.editicon', function () {
+                
+                var editid = $(this).attr("id");
+                $(this).siblings(".description").attr('contenteditable', 'true');
+                $(this).siblings(".description").focus();
+                $(this).siblings("button").show();
+                
+                
+                
+            });
+            $('.flex_container').on('click', '.update', function () {
+                var datas = $(this).siblings(".description").text();
+                var editid = $(this).attr("id");
+                // alert(editid);
+                $.ajax({
+                    
+                    url: "https://reminders-task.hiring.durbin.live/note/"+ editid,
+                    type: "PUT",
+                    headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({ "description": datas }),
+                    success: function (result) {
+                        alert('Edit Successful !');
+                        location.reload();
+                    }
+                });
+            }); 
+        });        
+    </script>
+</head>
+
+<body style="background: coral;">
+    <div class="container">
+        
+        <div class="row internaldiv">
+            <div class="col-lg-1 col1">
+                <div class="dropdown">
+                    <button class="dropdown-toggle plussign" type="button" id="menu1" data-toggle="dropdown">
+                        <div class="rotate"><i class="fas fa-plus "></i></div>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li class="li_one liitems">
+                            <div class="rounddiv rounddiv1"></div>
+                        </li>
+                        <li class="li_two liitems">
+                            <div class="rounddiv rounddiv2"></div>
+                        </li>
+                        <li class="li_three liitems">
+                            <div class="rounddiv rounddiv3"></div>
+                        </li>
+                        <li class="li_four liitems">
+                            <div class="rounddiv rounddiv4"></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-11 col2">
+                <!-- <button class="btn btn-info" id="add"> Add Div</button> -->
+                <div class="flex_container">
+                    
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</body>
+
+</html>
